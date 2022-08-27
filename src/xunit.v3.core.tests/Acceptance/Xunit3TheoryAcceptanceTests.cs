@@ -258,6 +258,52 @@ public class Xunit3TheoryAcceptanceTests
 		}
 
 		[Fact]
+		public async ValueTask NullableValueType()
+		{
+			var results = await RunForResultsAsync(typeof(ClassWithNullableValueType));
+
+			var passing = Assert.Single(results.OfType<TestPassedWithDisplayName>());
+			Assert.Equal("Xunit3TheoryAcceptanceTests+TheoryTests+ClassWithNullableValueType.TestMethod(value: 5)", passing.TestDisplayName);
+			var failed = Assert.Single(results.OfType<TestFailedWithDisplayName>());
+			Assert.Equal("Xunit3TheoryAcceptanceTests+TheoryTests+ClassWithNullableValueType.TestMethod(value: null)", failed.TestDisplayName);
+			Assert.Empty(results.OfType<TestSkippedWithDisplayName>());
+		}
+
+		private class ClassWithNullableValueType
+		{
+			[Theory]
+			[InlineData(5)]
+			[InlineData(null!)]
+			public void TestMethod(long? value)
+			{
+				Assert.NotNull(value);
+			}
+		}
+
+		[Fact]
+		public async ValueTask NullableDecimal()
+		{
+			var results = await RunForResultsAsync(typeof(ClassWithNullableDecimal));
+
+			var passing = Assert.Single(results.OfType<TestPassedWithDisplayName>());
+			Assert.Equal("Xunit3TheoryAcceptanceTests+TheoryTests+ClassWithNullableDecimal.TestMethod(value: 5)", passing.TestDisplayName);
+			var failed = Assert.Single(results.OfType<TestFailedWithDisplayName>());
+			Assert.Equal("Xunit3TheoryAcceptanceTests+TheoryTests+ClassWithNullableDecimal.TestMethod(value: null)", failed.TestDisplayName);
+			Assert.Empty(results.OfType<TestSkippedWithDisplayName>());
+		}
+
+		private class ClassWithNullableDecimal
+		{
+			[Theory]
+			[InlineData(5)]
+			[InlineData(null!)]
+			public void TestMethod(decimal? value)
+			{
+				Assert.NotNull(value);
+			}
+		}
+
+		[Fact]
 		public async ValueTask ImplicitExplicitConversions()
 		{
 			var results = await RunForResultsAsync(typeof(ClassWithOperatorConversions));

@@ -334,6 +334,7 @@ public static class ReflectionExtensions
 	{
 		// argumentValue is known to not be null when we're called from TryConvertObject
 		var argumentValueType = argumentValue.GetType();
+		var unwrappedParameterType = parameterType.UnwrapNullable();
 		var methodArguments = new object[] { argumentValue };
 
 		bool isMatchingOperator(
@@ -344,12 +345,17 @@ public static class ReflectionExtensions
 				m.IsStatic &&
 				!IsByRefLikeType(m.ReturnType) &&
 				m.GetParameters().Length == 1 &&
-				m.GetParameters()[0].ParameterType == argumentValueType &&
+				checkParamType(m.GetParameters()[0].ParameterType) &&
 				parameterType.IsAssignableFrom(m.ReturnType);
+
+		bool checkParamType(Type paramType)
+		{
+			return paramType == argumentValueType || paramType == unwrappedParameterType;
+		}
 
 		// Implicit & explicit conversions to/from a type can be declared on either side of the relationship.
 		// We need to check both possibilities.
-		foreach (var conversionDeclaringType in new[] { parameterType, argumentValueType })
+		foreach (var conversionDeclaringType in new[] { unwrappedParameterType, parameterType, argumentValueType })
 		{
 			var runtimeMethods = conversionDeclaringType.GetRuntimeMethods();
 
@@ -364,6 +370,7 @@ public static class ReflectionExtensions
 
 		return null;
 	}
+
 
 	static string ResolveGenericDisplay(_ITypeInfo[]? genericTypes)
 	{
